@@ -1,0 +1,72 @@
+import Dexie, { type Table } from "dexie";
+
+export type DailyProgressRow = {
+  id?: number;
+  userId: string;
+  dateKey: string; // YYYY-MM-DD (local)
+  puzzleId: string;
+  puzzleType: string;
+  state: unknown; // client-side puzzle state snapshot
+  hintsUsed: number;
+  startedAt: string; // ISO
+  solvedAt: string | null; // ISO
+  updatedAt: string; // ISO
+};
+
+export type CachedPuzzleRow = {
+  dateKey: string; // YYYY-MM-DD (local)
+  puzzleId: string;
+  puzzleType: string;
+  payload: unknown; // deterministic generated puzzle payload
+  createdAt: string; // ISO
+};
+
+class LogicLooperDB extends Dexie {
+  dailyProgress!: Table<DailyProgressRow, number>;
+  cachedPuzzles!: Table<CachedPuzzleRow, string>;
+
+  constructor() {
+    super("LogicLooperDB");
+
+    this.version(1).stores({
+      // Primary key autoincrement; queryable by userId+dateKey
+      dailyProgress: "++id,[userId+dateKey],userId,dateKey,puzzleId",
+
+      // Primary key dateKey
+      cachedPuzzles: "dateKey,puzzleId,puzzleType",
+    });
+  }
+}
+
+export const db = new LogicLooperDB();
+
+export function toLocalDateKey(date = new Date()): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+export const dbOps = {
+  getDailyProgress: async (userId: string, dateKey = toLocalDateKey()) => {
+    return db.dailyProgress.where({ userId, dateKey }).first();
+  },
+
+  upsertDailyProgress: async (row: Omit<DailyProgressRow, "id" | "updatedAt">) => {
+    const existing = await db.dailyProgress.where({ userId: row.userId, dateKey: row.dateKey }).first();
+    const nowIso = new Date().toISOString();
+    if (existing?.id != null) {
+      await db.dailyProgress.update(existing.id, { ...row, updatedAt: nowIso });
+      return existing.id;
+    }
+    return db.dailyProgress.add({ ...row, updatedAt: nowIso });
+  },
+
+  cachePuzzle: async (row: CachedPuzzleRow) => {
+    return db.cachedPuzzles.put(row);
+  },
+
+  getCachedPuzzle: async (dateKey = toLocalDateKey()) => {
+    return db.cachedPuzzles.get(dateKey);
+  },
+};
