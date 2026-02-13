@@ -215,81 +215,111 @@ function Puzzle() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
-        <h2 className="text-3xl font-semibold text-brand-navy">{puzzle.title}</h2>
-        <div className="text-sm text-brand-ink/70">{dateKey}</div>
-      </div>
-
-      <p className="mt-4 text-brand-ink">{puzzle.prompt}</p>
-
-      <div className="mt-6 rounded bg-brand-white p-4 shadow">
-        {puzzle.type === "pattern" || puzzle.type === "deduction" ? (
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {puzzle.data.options.map((opt) => (
-              <button
-                key={opt}
-                type="button"
-                className={`rounded border px-3 py-2 text-left transition-colors ${answer === opt ? "border-brand-primary bg-brand-primaryTint" : "border-brand-slate bg-brand-white"}`}
-                onClick={() => setAnswer(opt)}
-              >
-                {opt}
-              </button>
-            ))}
+      <div className="rounded-3xl bg-gradient-to-r from-brand-primaryTint via-brand-skyTint to-brand-lavender p-[1px] shadow">
+        <div className="rounded-3xl border border-brand-white/60 bg-brand-white/70 p-6 shadow-sm backdrop-blur transition-shadow hover:shadow-lg">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h2 className="text-4xl font-bold tracking-tight">
+                <span className="bg-gradient-to-r from-brand-navy to-brand-violet bg-clip-text text-transparent">
+                  {puzzle.title}
+                </span>
+              </h2>
+              <p className="mt-2 text-brand-ink/80">{puzzle.prompt}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center rounded-full border border-brand-ink/10 bg-brand-white/70 px-3 py-1 text-xs font-semibold text-brand-ink/80 shadow-sm backdrop-blur">
+                <i className="bi bi-calendar2" aria-hidden />
+                <span className="ml-2">{dateKey}</span>
+              </span>
+              <span className="inline-flex items-center rounded-full bg-brand-primaryTint px-3 py-1 text-xs font-semibold text-brand-primary shadow-sm">
+                <i className="bi bi-lightbulb" aria-hidden />
+                <span className="ml-2">{maxHints - hintsUsed} hints</span>
+              </span>
+            </div>
           </div>
-        ) : (
-          <div>
-            <label className="block text-sm font-medium text-brand-ink">Answer</label>
-            <input
-              value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
-              placeholder={puzzle.type === "matrix" ? "Enter 16 digits (1–4)" : "Type your answer"}
-              className="mt-1 w-full rounded border border-brand-slate bg-brand-white px-3 py-2"
-            />
-            {puzzle.type === "matrix" && (
-              <p className="mt-2 text-xs text-brand-ink/70">
-                Tip: you can type digits only, e.g. 1234341221434321
-              </p>
+
+          <div className="mt-6 rounded-2xl border border-brand-white/60 bg-brand-white/65 p-4 shadow-sm backdrop-blur">
+            {puzzle.type === "pattern" || puzzle.type === "deduction" ? (
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {puzzle.data.options.map((opt) => (
+                  <button
+                    key={opt}
+                    type="button"
+                    className={`rounded-xl border px-3 py-2 text-left transition-all hover:-translate-y-0.5 active:translate-y-0 ${
+                      answer === opt
+                        ? "border-brand-primary bg-brand-primaryTint"
+                        : "border-brand-ink/10 bg-brand-white/80 hover:bg-brand-white"
+                    }`}
+                    onClick={() => setAnswer(opt)}
+                  >
+                    {opt}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div>
+                <label className="block text-sm font-medium text-brand-ink">Answer</label>
+                <input
+                  value={answer}
+                  onChange={(e) => setAnswer(e.target.value)}
+                  placeholder={puzzle.type === "matrix" ? "Enter 16 digits (1–4)" : "Type your answer"}
+                  className="mt-1 w-full rounded-xl border border-brand-ink/10 bg-brand-white/80 px-3 py-2 outline-none shadow-sm transition-shadow focus:shadow"
+                />
+                {puzzle.type === "matrix" && (
+                  <p className="mt-2 text-xs text-brand-ink/70">Tip: you can type digits only, e.g. 1234341221434321</p>
+                )}
+              </div>
+            )}
+
+            <div className="mt-4 flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={submit}
+                className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-brand-primary via-brand-primaryAlt to-brand-violet px-5 py-3 font-semibold text-brand-white shadow transition-all hover:shadow-lg active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/40"
+              >
+                <i className="bi bi-check2-circle" aria-hidden />
+                Check
+              </button>
+              <button
+                type="button"
+                onClick={useHint}
+                disabled={hintsUsed >= maxHints}
+                className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-brand-violet to-brand-navy px-5 py-3 font-semibold text-brand-white shadow transition-all hover:shadow-lg active:scale-[0.99] disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-violet/40"
+              >
+                <i className="bi bi-lightbulb-fill" aria-hidden />
+                Hint ({maxHints - hintsUsed} left)
+              </button>
+            </div>
+
+            <div className="mt-4 flex flex-wrap gap-x-6 gap-y-1 text-sm text-brand-ink/80">
+              <div>
+                <span className="font-semibold text-brand-navy">Attempts</span>: {attempts}
+              </div>
+              <div>
+                <span className="font-semibold text-brand-navy">Hints</span>: {hintsUsed}
+              </div>
+              {status?.ok && score != null && (
+                <div className="font-semibold text-brand-navy">
+                  <i className="bi bi-trophy" aria-hidden /> <span className="ml-1">Score: {score}</span>
+                </div>
+              )}
+            </div>
+
+            {hintText && (
+              <div className="mt-4 rounded-2xl border border-brand-ink/10 bg-brand-white/70 p-3 text-sm text-brand-ink shadow-sm backdrop-blur">
+                {hintText}
+              </div>
+            )}
+
+            {status && (
+              <div
+                className={`mt-4 rounded-xl border p-3 text-sm ${status.ok ? "border-green-200 bg-green-50 text-green-800" : "border-brand-accent/30 bg-brand-accent/10 text-brand-ink"}`}
+              >
+                {status.message}
+              </div>
             )}
           </div>
-        )}
-
-        <div className="mt-4 flex flex-wrap gap-3">
-          <button
-            type="button"
-            onClick={submit}
-            className="rounded bg-brand-primary px-4 py-2 font-semibold text-brand-white transition-opacity active:opacity-90"
-          >
-            Check
-          </button>
-          <button
-            type="button"
-            onClick={useHint}
-            disabled={hintsUsed >= maxHints}
-            className="rounded bg-brand-violet px-4 py-2 font-semibold text-brand-white transition-opacity active:opacity-90 disabled:opacity-50"
-          >
-            Hint ({maxHints - hintsUsed} left)
-          </button>
         </div>
-
-        <div className="mt-4 flex flex-wrap gap-x-6 gap-y-1 text-sm text-brand-ink/80">
-          <div>Attempts: {attempts}</div>
-          <div>Hints used: {hintsUsed}</div>
-          {status?.ok && score != null && <div className="font-semibold text-brand-navy">Score: {score}</div>}
-        </div>
-
-        {hintText && (
-          <div className="mt-4 rounded border border-brand-slate bg-brand-lavender p-3 text-sm text-brand-ink">
-            {hintText}
-          </div>
-        )}
-
-        {status && (
-          <div
-            className={`mt-4 rounded border p-3 text-sm ${status.ok ? "border-green-200 bg-green-50 text-green-800" : "border-brand-accent/30 bg-brand-accent/10 text-brand-ink"}`}
-          >
-            {status.message}
-          </div>
-        )}
       </div>
     </div>
   )

@@ -37,7 +37,7 @@ function App() {
             transition={{ duration: 0.18 }}
             aria-label={title}
           >
-            {page === "home" && <Home />}
+            {page === "home" && <Home onNavigate={onNavigate} />}
             {page === "puzzle" && <Puzzle />}
             {page === "login" && <Login />}
           </motion.div>

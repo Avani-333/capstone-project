@@ -1,3 +1,26 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+	html,
+	body,
+	#root {
+		height: 100%;
+	}
+
+	body {
+		background:
+			radial-gradient(900px circle at 10% 0%, rgba(65, 75, 234, 0.12), transparent 55%),
+			radial-gradient(800px circle at 90% 10%, rgba(119, 82, 254, 0.12), transparent 55%),
+			linear-gradient(135deg, #F6F5F5, #F8EDFF);
+		color: #3D3B40;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	}
+
+	::selection {
+		background: #D9E2FF;
+		color: #190482;
+	}
+}
