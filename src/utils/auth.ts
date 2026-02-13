@@ -1,6 +1,29 @@
 import { httpJson } from "./http";
 import { clearSessionUser, setSessionUser, type AuthMethod, type SessionUser } from "./session";
 
+declare global {
+  interface Window {
+    google?: {
+      accounts?: {
+        id?: {
+          initialize: (params: {
+            client_id: string;
+            callback: (resp: { credential?: string }) => void;
+          }) => void;
+          prompt: (cb: (notification: { isNotDisplayed?: () => boolean; isSkippedMoment?: () => boolean }) => void) => void;
+        };
+      };
+    };
+    Truecaller?: {
+      initialize?: (params: { partnerKey: string }) => void;
+      requestVerification?: (params: {
+        onSuccess: (data: { phone?: string; name?: string }) => void;
+        onFailure: (err: { message?: string }) => void;
+      }) => void;
+    };
+  }
+}
+
 type RegisterResponse = SessionUser & {
   stats?: {
     id: string;
@@ -65,7 +88,7 @@ export const auth = {
   guest: async () => {
     try {
       return await registerUser({ authMethod: "guest", name: "Guest" });
-    } catch (e) {
+    } catch {
       // Frontend-only mode (e.g., running `npm run dev` on port 5173) won't have `/api/*`.
       // In that case, allow guest sessions to work locally and sync later.
       const local = createLocalGuest("Guest");
@@ -82,20 +105,22 @@ export const auth = {
 
     await loadGoogleIdentityServices();
 
-    const google = (window as any).google as any;
+    const google = window.google;
     if (!google?.accounts?.id) {
       throw new Error("Google Identity Services not available");
     }
 
+    const googleId = google.accounts.id;
+
     const credential = await new Promise<string>((resolve, reject) => {
-      google.accounts.id.initialize({
+      googleId.initialize({
         client_id: clientId,
         callback: (resp: { credential?: string }) => {
           if (!resp.credential) reject(new Error("Google credential missing"));
           else resolve(resp.credential);
         },
       });
-      google.accounts.id.prompt((notification: any) => {
+      googleId.prompt((notification) => {
         if (notification?.isNotDisplayed?.() || notification?.isSkippedMoment?.()) {
           reject(new Error("Google sign-in was cancelled"));
         }
@@ -132,7 +157,7 @@ export const auth = {
       });
     }
 
-    const Truecaller = (window as any).Truecaller as any;
+    const Truecaller = window.Truecaller;
     if (!Truecaller) {
       throw new Error("Truecaller SDK did not initialize");
     }
@@ -141,11 +166,11 @@ export const auth = {
       try {
         Truecaller.initialize?.({ partnerKey });
         Truecaller.requestVerification?.({
-          onSuccess: (data: any) => resolve({ phone: data?.phone, name: data?.name }),
-          onFailure: (err: any) => reject(new Error(err?.message ?? "Truecaller verification failed")),
+          onSuccess: (data) => resolve({ phone: data?.phone, name: data?.name }),
+          onFailure: (err) => reject(new Error(err?.message ?? "Truecaller verification failed")),
         });
-      } catch (e: any) {
-        reject(new Error(e?.message ?? "Truecaller request failed"));
+      } catch (err) {
+        reject(new Error(err instanceof Error ? err.message : "Truecaller request failed"));
       }
     });
 

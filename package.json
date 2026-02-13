@@ -23,8 +23,10 @@
     "@prisma/adapter-neon": "^7.3.0",
     "@prisma/client": "^7.3.0",
     "dexie": "^4.3.0",
+    "framer-motion": "^12.34.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "vite-plugin-pwa": "^1.2.0",
     "ws": "^8.19.0"
   },
   "devDependencies": {

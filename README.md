@@ -1,6 +1,6 @@
-# Logic Looper (Phase 1)
+# Logic Looper
 
-Client-first daily puzzle game foundation.
+Client-first daily puzzle game (Phases 1–4).
 
 ## What’s included
 
@@ -9,6 +9,9 @@ Client-first daily puzzle game foundation.
 - Vercel-style serverless API routes under `api/`
 - Client auth scaffolding (Guest works; Google/Truecaller optional via env vars)
 - IndexedDB storage (Dexie) for offline daily progress caching
+- Phase 2: deterministic daily puzzle engine + 5 puzzle types + validators + basic UI
+- Phase 3: streaks + heatmap, daily reset, hints + scoring, responsive polish
+- Phase 4: Framer Motion transitions, PWA offline support, optional client analytics
 
 ## Local development
 
@@ -63,6 +66,10 @@ Optional (enable logins):
 - `VITE_TRUECALLER_SDK_URL`
 - `VITE_TRUECALLER_PARTNER_KEY`
 
+Optional (client analytics):
+
+- `VITE_ANALYTICS_ENDPOINT` (POST JSON events; if unset, analytics is disabled)
+
 See `.env.example`.
 
 ## Deploy to Vercel
@@ -72,3 +79,7 @@ See `.env.example`.
    - `DATABASE_URL`
    - any optional `VITE_*` variables you need
 3) Deploy.
+
+## PWA / Offline
+
+The app registers a service worker in production builds. After you deploy (or run `npm run preview`), it can work offline for already-cached pages/assets.

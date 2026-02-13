@@ -7,29 +7,29 @@ type Props = {
 
 function MainLayout({ children, onNavigate }: Props) {
   return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="p-4 flex justify-between items-center bg-white shadow">
-        <span className="font-bold text-xl">
-          Daily Puzzle Game
+    <div className="min-h-screen bg-brand-surface text-brand-ink">
+      <header className="p-4 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center bg-brand-white shadow">
+        <span className="font-bold text-xl text-brand-navy">
+          Logic Looper
         </span>
 
-        <div className="space-x-4">
+        <div className="flex flex-wrap gap-x-4 gap-y-2">
           <button
-            className="text-sm text-blue-600 underline"
+            className="text-sm text-brand-primary underline transition-opacity hover:opacity-80"
             onClick={() => onNavigate("home")}
           >
             Home
           </button>
 
           <button
-            className="text-sm text-blue-600 underline"
+            className="text-sm text-brand-primary underline transition-opacity hover:opacity-80"
             onClick={() => onNavigate("puzzle")}
           >
             Puzzle
           </button>
 
           <button
-            className="text-sm text-blue-600 underline"
+            className="text-sm text-brand-primary underline transition-opacity hover:opacity-80"
             onClick={() => onNavigate("login")}
           >
             Login
@@ -37,7 +37,7 @@ function MainLayout({ children, onNavigate }: Props) {
         </div>
       </header>
 
-      <main className="p-6">
+      <main className="p-4 sm:p-6">
         {children}
       </main>
     </div>

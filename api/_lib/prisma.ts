@@ -2,10 +2,9 @@ import { PrismaClient } from "@prisma/client";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { neon, type NeonQueryFunction } from "@neondatabase/serverless";
 
-declare global {
-  // eslint-disable-next-line no-var
-  var __prisma: PrismaClient | undefined;
-}
+type GlobalWithPrisma = typeof globalThis & {
+  __prisma?: PrismaClient;
+};
 
 function createPrismaClient() {
   const databaseUrl = process.env.DATABASE_URL;
@@ -19,8 +18,8 @@ function createPrismaClient() {
   return new PrismaClient({ adapter });
 }
 
-export const prisma = globalThis.__prisma ?? createPrismaClient();
+export const prisma = (globalThis as GlobalWithPrisma).__prisma ?? createPrismaClient();
 
 if (process.env.NODE_ENV !== "production") {
-  globalThis.__prisma = prisma;
+  (globalThis as GlobalWithPrisma).__prisma = prisma;
 }

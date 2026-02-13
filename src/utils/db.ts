@@ -8,6 +8,9 @@ export type DailyProgressRow = {
   puzzleType: string;
   state: unknown; // client-side puzzle state snapshot
   hintsUsed: number;
+  attempts?: number;
+  score?: number;
+  timeTakenMs?: number;
   startedAt: string; // ISO
   solvedAt: string | null; // ISO
   updatedAt: string; // ISO
@@ -35,6 +38,12 @@ class LogicLooperDB extends Dexie {
       // Primary key dateKey
       cachedPuzzles: "dateKey,puzzleId,puzzleType",
     });
+
+    // v2: add optional scoring fields (no new indexes required)
+    this.version(2).stores({
+      dailyProgress: "++id,[userId+dateKey],userId,dateKey,puzzleId",
+      cachedPuzzles: "dateKey,puzzleId,puzzleType",
+    });
   }
 }
 
@@ -47,9 +56,35 @@ export function toLocalDateKey(date = new Date()): string {
   return `${y}-${m}-${d}`;
 }
 
+export function parseDateKey(dateKey: string): Date {
+  const [y, m, d] = dateKey.split("-").map((x) => Number(x));
+  return new Date(y!, (m ?? 1) - 1, d ?? 1);
+}
+
+export function addDaysToDateKey(dateKey: string, days: number): string {
+  const dt = parseDateKey(dateKey);
+  dt.setDate(dt.getDate() + days);
+  return toLocalDateKey(dt);
+}
+
+export function listPastDateKeys(fromDateKey: string, daysBack: number): string[] {
+  const keys: string[] = [];
+  for (let i = daysBack; i >= 0; i--) keys.push(addDaysToDateKey(fromDateKey, -i));
+  return keys;
+}
+
 export const dbOps = {
   getDailyProgress: async (userId: string, dateKey = toLocalDateKey()) => {
     return db.dailyProgress.where({ userId, dateKey }).first();
+  },
+
+  listDailyProgressSince: async (userId: string, sinceDateKey: string) => {
+    // dateKey uses YYYY-MM-DD so lexicographic compare matches chronological order.
+    return db.dailyProgress
+      .where("userId")
+      .equals(userId)
+      .and((row) => row.dateKey >= sinceDateKey)
+      .toArray();
   },
 
   upsertDailyProgress: async (row: Omit<DailyProgressRow, "id" | "updatedAt">) => {

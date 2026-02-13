@@ -54,7 +54,7 @@ function Login() {
           )}
 
           <button
-            className="mx-auto block w-full max-w-md rounded bg-gray-900 px-4 py-3 text-white disabled:opacity-50"
+            className="mx-auto block w-full max-w-md rounded bg-brand-navy px-4 py-3 text-brand-white disabled:opacity-50"
             disabled={isBusy}
             onClick={() => run(() => auth.guest())}
           >
@@ -62,7 +62,7 @@ function Login() {
           </button>
 
           <button
-            className="mx-auto block w-full max-w-md rounded bg-blue-600 px-4 py-3 text-white disabled:opacity-50"
+            className="mx-auto block w-full max-w-md rounded bg-brand-primary px-4 py-3 text-brand-white disabled:opacity-50"
             disabled={isBusy || !hasGoogle}
             onClick={() => {
               if (!hasGoogle) return
@@ -73,7 +73,7 @@ function Login() {
           </button>
 
           <button
-            className="mx-auto block w-full max-w-md rounded bg-indigo-600 px-4 py-3 text-white disabled:opacity-50"
+            className="mx-auto block w-full max-w-md rounded bg-brand-violet px-4 py-3 text-brand-white disabled:opacity-50"
             disabled={isBusy || !hasTruecaller}
             onClick={() => {
               if (!hasTruecaller) return

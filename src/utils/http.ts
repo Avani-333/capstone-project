@@ -2,6 +2,10 @@ export type HttpMethod = "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
 
 type Json = Record<string, unknown> | unknown[];
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === "object";
+}
+
 function getApiBaseUrl(): string {
   const fromEnv = import.meta.env.VITE_API_BASE_URL as string | undefined;
   return (fromEnv ?? "").replace(/\/$/, "");
@@ -27,8 +31,8 @@ export async function httpJson<TResponse>(
 
   if (!res.ok) {
     const message =
-      (json && typeof json === "object" && "error" in json && typeof (json as any).error === "string"
-        ? (json as any).error
+      (isRecord(json) && "error" in json && typeof json.error === "string"
+        ? json.error
         : `Request failed (${res.status})`) as string;
     throw new Error(message);
   }
